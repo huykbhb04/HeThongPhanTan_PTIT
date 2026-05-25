@@ -32,8 +32,11 @@ export async function POST(req: Request) {
   const isOrganizationMember = !!(
     document.organizationId && document.organizationId === sessionClaims.org_id
   );
+  // Cho phép: owner, thành viên cùng org, HOẶC bất kỳ ai đã đăng nhập có link tài liệu
+  // (tương tự "Anyone with the link" của Google Docs)
+  const isAuthenticated = !!user.id;
 
-  if (!isOwner && !isOrganizationMember) {
+  if (!isOwner && !isOrganizationMember && !isAuthenticated) {
     return new Response("Unauthorized", { status: 401 });
   }
 

@@ -1,6 +1,1 @@
-[1209/114642.218:ERROR:registration_protocol_win.cc(108)] CreateFile: The system cannot find the file specified. (0x2)
-[1209/114645.033:ERROR:registration_protocol_win.cc(108)] CreateFile: The system cannot find the file specified. (0x2)
-[1209/114649.138:ERROR:registration_protocol_win.cc(108)] CreateFile: The system cannot find the file specified. (0x2)
-[1209/114649.903:ERROR:registration_protocol_win.cc(108)] CreateFile: The system cannot find the file specified. (0x2)
-[1209/130616.593:ERROR:registration_protocol_win.cc(108)] CreateFile: The system cannot find the file specified. (0x2)
-[1210/090655.256:ERROR:registration_protocol_win.cc(108)] CreateFile: The system cannot find the file specified. (0x2)
+{"isOwner":true,"isOrganizationMember":false,"ownerId":"user_3EDxwfXC1CegBIUx3y0HkaJskCc","userId":"user_3EDxwfXC1CegBIUx3y0HkaJskCc","docOrgId":"org_3EDy0OM6PgEmb9vnSzVJdReZ39u"}
