@@ -1,172 +1,108 @@
-# Google Docs Clone
+# 📝 Hệ thống Soạn thảo Văn bản Cộng tác (Google Docs Clone)
 
-A collaborative document editor built with Next.js, featuring real-time collaboration, authentication, and organizational support. This application provides a Google Docs-like experience with rich text editing, live cursors, comments, and document management.
+Dự án đồ án môn học: Xây dựng một ứng dụng web cho phép nhiều người dùng cùng soạn thảo văn bản theo thời gian thực, tương tự như Google Docs.
 
-## Features
+## 🚀 Các tính năng chính
 
-- **Real-time Collaboration**: Multiple users can edit documents simultaneously with live cursors and instant updates
-- **Rich Text Editor**: Powered by TipTap with support for headings, formatting, tables, images, and more
-- **Authentication**: Secure user authentication with Clerk, supporting organizations and personal accounts
-- **Document Management**: Create, edit, delete, and organize documents with search functionality
-- **Organizational Support**: Share documents within organizations and manage team collaboration
-- **Responsive Design**: Modern UI built with Tailwind CSS and shadcn/ui components
-- **Template Gallery**: Pre-built document templates for common use cases
+- **Soạn thảo thời gian thực (Real-time Collaboration):** Nhiều người dùng cùng chỉnh sửa một tài liệu đồng thời mà không bị xung đột (Sử dụng CRDT thông qua Yjs & Liveblocks).
+- **Live Cursors & Presence:** Hiển thị con trỏ chuột, vùng chọn (selection) và trạng thái online của những người dùng khác trong thời gian thực.
+- **Rich Text Editor:** Hỗ trợ định dạng văn bản (Bold, Italic, Underline), Heading, căn lề, danh sách (Bullet/Ordered list), bảng, chèn ảnh, highlight, thay đổi font chữ và kích thước chữ.
+- **Bình luận (Comments & Threads):** Chọn một đoạn văn bản và để lại bình luận, hỗ trợ thảo luận trực tiếp trên tài liệu.
+- **Xác thực người dùng:** Đăng nhập an toàn qua Clerk (Hỗ trợ Google, Email).
+- **Quản lý Tổ chức (Organizations):** Cho phép làm việc nhóm thông qua tính năng Organizations của Clerk.
+- **Quản lý tài liệu:** Tạo mới, đổi tên, xóa và tìm kiếm tài liệu. Cung cấp sẵn một số template (Letter, Resume, Proposal).
+- **Lưu trữ dữ liệu an toàn:** Metadata của tài liệu được lưu trên Convex DB, nội dung chi tiết được lưu trên Liveblocks Cloud.
+- **Xuất tài liệu:** Hỗ trợ xuất file dưới dạng PDF, HTML, JSON, hoặc Text.
 
-## Tech Stack
+## 🛠 Công nghệ sử dụng
 
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **Backend**: Convex for real-time database and API
-- **Authentication**: Clerk with organization support
-- **Real-time Collaboration**: Liveblocks for collaborative editing
-- **Editor**: TipTap with collaborative extensions
-- **Styling**: Tailwind CSS, shadcn/ui components
-- **State Management**: Zustand
+- **Frontend:** Next.js 15, React 19, Tailwind CSS, shadcn/ui.
+- **Editor:** TipTap (dựa trên ProseMirror).
+- **Realtime Engine & CRDT:** Liveblocks.
+- **Cơ sở dữ liệu (Database):** Convex (Serverless Database).
+- **Xác thực (Authentication):** Clerk.
 
-## Prerequisites
+---
 
-Before setting up the project, ensure you have:
+## 💻 Hướng dẫn Cài đặt & Chạy dự án Local
 
-- A Convex account
-- A Clerk account
-- A Liveblocks account
+### Bước 1: Yêu cầu hệ thống
+- Cài đặt **Node.js** (phiên bản 18 trở lên).
+- Cài đặt **Git**.
 
-## Setup Instructions
-
-### 1. Clone and Install Dependencies
+### Bước 2: Clone dự án và cài đặt thư viện
+Mở terminal và chạy các lệnh sau:
 
 ```bash
-git clone https://github.com/Davronov-Alimardon/google-docs.git
-cd google-docs-clone
-npm install
+git clone https://github.com/huykbhb04/HeThongPhanTan_PTIT.git
+cd HeThongPhanTan_PTIT
+npm install --legacy-peer-deps
 ```
 
-> **Note**: Use `npm install --legacy-peer-deps` flag if you encounter version conflicts during installation.
-
-### 2. Environment Variables
-
-Create a `.env.local` file in the root directory with the following variables:
+### Bước 3: Cấu hình biến môi trường (.env.local)
+Tạo một file tên là `.env.local` ở thư mục gốc của dự án và thêm các khóa sau (xem hướng dẫn lấy khóa ở bên dưới):
 
 ```env
-# Convex
-NEXT_PUBLIC_CONVEX_URL=your-convex-deployment-url
+# Clerk Auth Keys
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
 
-# Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-publishable-key
-CLERK_SECRET_KEY=your-clerk-secret-key
+# Convex URL
+NEXT_PUBLIC_CONVEX_URL=your_convex_url
 
-# Liveblocks
-LIVEBLOCKS_SECRET_KEY=your-liveblocks-secret-key
+# Liveblocks Secret Key
+LIVEBLOCKS_SECRET_KEY=your_liveblocks_secret_key
 ```
 
-### 3. Convex Setup
+### Bước 4: Khởi động Convex & Ứng dụng Next.js
+Bạn cần mở **2 cửa sổ Terminal** riêng biệt:
 
-#### Install Convex CLI
-```bash
-npm install -g convex
-```
-
-#### Initialize Convex
+**Terminal 1:** Khởi động và đồng bộ Convex (Cơ sở dữ liệu)
 ```bash
 npx convex dev
 ```
 
-#### Configure Authentication
-1. Go to your Convex dashboard
-2. Navigate to Settings > Authentication
-3. Add Clerk as an authentication provider
-4. Use your Clerk domain: `https://your-clerk-domain.clerk.accounts.dev`
-5. Set the application ID to: `convex`
-
-#### Deploy Convex Functions
-```bash
-npx convex deploy
-```
-
-### 4. Clerk Setup
-
-#### Create Clerk Application
-1. Sign up at [clerk.com](https://clerk.com)
-2. Create a new application
-3. Enable organizations in your Clerk dashboard:
-   - Go to Configure > Organizations
-   - Enable organizations feature
-   - Configure organization settings as needed
-
-#### Configure JWT Template
-1. In your Clerk dashboard, go to Configure > JWT Templates
-2. Create a new template called `convex`
-3. Add the following claims:
-```json
-{
-  "aud": "convex",
-  "name": "{{user.full_name}}",
-  "email": "{{user.primary_email_address}}",
-  "picture": "{{user.image_url}}",
-  "nickname": "{{user.username}}",
-  "given_name": "{{user.first_name}}",
-  "updated_at": "{{user.updated_at}}",
-  "family_name": "{{user.last_name}}",
-  "phone_number": "{{user.primary_phone_number}}",
-  "email_verified": "{{user.email_verified}}",
-  "organization_id": "{{org.id}}",
-  "phone_number_verified": "{{user.phone_number_verified}}"
-}
-```
-
-#### Update Convex Auth Config
-Update `convex/auth.config.ts` with your Clerk domain:
-```typescript
-export default {
-  providers: [
-    {
-      domain: "https://your-clerk-domain.clerk.accounts.dev",
-      applicationID: "convex"
-    }
-  ]
-}
-```
-
-### 5. Liveblocks Setup
-
-#### Create Liveblocks Project
-1. Sign up at [liveblocks.io](https://liveblocks.io)
-2. Create a new project
-3. Get your public and secret keys from the dashboard
-
-### 6. Run the Development Server
-
+**Terminal 2:** Khởi động ứng dụng Next.js
 ```bash
 npm run dev
 ```
+Sau đó truy cập vào [http://localhost:3000](http://localhost:3000) để sử dụng ứng dụng.
 
-The application will be available at `http://localhost:3000`.
+---
 
-## Project Structure
+## 🔑 Hướng dẫn lấy các API Key
 
-```
-src/
-├── app/                   # Next.js app directory
-│   ├── (home)/            # Home page and document listing
-│   ├── api/               # API routes
-│   ├── documents/         # Document editing interface
-│   └── layout.tsx         # Root layout
-├── components/            # Reusable components
-│   ├── ui/                # shadcn/ui components
-│   └── ...                # Custom components
-├── hooks/                 # Custom React hooks
-├── lib/                   # Utility functions
-└── store/                 # Zustand stores
+### 1. Clerk (Hệ thống xác thực)
+1. Truy cập [Clerk.com](https://clerk.com/) và tạo tài khoản.
+2. Tạo một Application mới. Chọn các phương thức đăng nhập bạn muốn (ví dụ: Google, Email).
+3. Sau khi tạo xong, vào trang Dashboard của App, mục **API Keys**.
+4. Copy `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` và `CLERK_SECRET_KEY` dán vào file `.env.local`.
+5. **Cấu hình tích hợp Clerk với Convex:** 
+   - Trong giao diện Clerk Dashboard, tìm mục **JWT Templates** ở menu bên trái.
+   - Nhấn **New Template** và chọn mẫu **Convex**.
+   - Copy mục `Issuer` (ví dụ: `https://your-issuer.clerk.accounts.dev`).
+   - Mở file `convex/auth.config.ts` trong source code và thay thế giá trị `domain` bằng URL Issuer vừa copy.
 
-convex/
-├── documents.ts          # Document CRUD operations
-├── schema.ts             # Database schema
-└── auth.config.ts        # Authentication configuration
-```
+### 2. Convex (Cơ sở dữ liệu)
+1. Truy cập [Convex.dev](https://www.convex.dev/) và đăng nhập (có thể dùng Github).
+2. Khi bạn chạy lệnh `npx convex dev` lần đầu trong terminal, trình duyệt sẽ tự động mở lên yêu cầu bạn đăng nhập và chọn/tạo dự án Convex.
+3. Sau khi chấp nhận, Convex sẽ tự động cấu hình và ghi URL dự án vào file `.env.local` của bạn dưới dạng biến `NEXT_PUBLIC_CONVEX_URL` (bạn không cần copy bằng tay).
 
-## Contributing
+### 3. Liveblocks (Hệ thống Realtime & Đồng bộ)
+1. Truy cập [Liveblocks.io](https://liveblocks.io/) và tạo tài khoản.
+2. Tạo một Project mới.
+3. Trong giao diện Project, chuyển sang tab **API Keys**.
+4. Tìm phần **Secret Keys** (chú ý lấy Secret Key bắt đầu bằng `sk_`, **KHÔNG** lấy Public Key `pk_`).
+5. Copy Secret Key và dán vào file `.env.local` tại biến `LIVEBLOCKS_SECRET_KEY`.
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+---
+
+## 🤝 Hướng dẫn kiểm thử cộng tác (Test Real-time)
+1. Mở ứng dụng ở Tab bình thường (Chrome/Edge) và đăng nhập bằng Tài khoản A.
+2. Mở một Tab Ẩn danh (Incognito Window) và đăng nhập bằng Tài khoản B.
+3. Ở Tài khoản A, tạo một tài liệu mới và copy URL tài liệu trên thanh địa chỉ.
+4. Ở Tài khoản B, dán URL đó vào thanh địa chỉ để mở tài liệu.
+5. Để hai cửa sổ cạnh nhau, bạn sẽ thấy con trỏ chuột của người kia và nội dung cập nhật theo thời gian thực (độ trễ < 100ms).
+
+---
+*Dự án được xây dựng cho mục đích học tập môn Hệ thống Phân tán.*
