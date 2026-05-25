@@ -1,4 +1,4 @@
-# 📝 Hệ thống Soạn thảo Văn bản Cộng tác (Google Docs Clone)
+# 📝 Hệ thống Soạn thảo Văn bản Cộng tác
 
 Dự án đồ án môn học: Xây dựng một ứng dụng web cho phép nhiều người dùng cùng soạn thảo văn bản theo thời gian thực, tương tự như Google Docs.
 
