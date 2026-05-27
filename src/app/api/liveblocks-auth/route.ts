@@ -3,10 +3,33 @@ import { ConvexHttpClient } from "convex/browser";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { api } from "../../../../convex/_generated/api";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-const liveblocks = new Liveblocks({
-  secret: process.env.LIVEBLOCKS_SECRET_KEY!,
-});
+export const dynamic = "force-dynamic";
+
+let convexInstance: ConvexHttpClient | null = null;
+let liveblocksInstance: Liveblocks | null = null;
+
+function getConvex() {
+  if (!convexInstance) {
+    const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+    if (!url) {
+      throw new Error("NEXT_PUBLIC_CONVEX_URL is not set");
+    }
+    convexInstance = new ConvexHttpClient(url);
+  }
+  return convexInstance;
+}
+
+function getLiveblocks() {
+  if (!liveblocksInstance) {
+    const secret = process.env.LIVEBLOCKS_SECRET_KEY;
+    if (!secret) {
+      throw new Error("LIVEBLOCKS_SECRET_KEY is not set");
+    }
+    liveblocksInstance = new Liveblocks({ secret });
+  }
+  return liveblocksInstance;
+}
+
 
 export async function POST(req: Request) {
   const { sessionClaims } = await auth();
@@ -27,7 +50,7 @@ export async function POST(req: Request) {
   // so we can fetch the document config and perform auth locally here.
   let document;
   try {
-    document = await convex.query(api.documents.getByIdForAuth, { id: room });
+    document = await getConvex().query(api.documents.getByIdForAuth, { id: room });
   } catch {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -71,7 +94,7 @@ export async function POST(req: Request) {
   const hue = Math.abs(nameToNumber) % 360;
   const color = `hsl(${hue}, 80%, 60%)`;
   
-  const session = liveblocks.prepareSession(user.id, {
+  const session = getLiveblocks().prepareSession(user.id, {
     userInfo: {
       name,
       avatar: user.imageUrl,

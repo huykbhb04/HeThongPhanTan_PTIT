@@ -5,10 +5,21 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { api } from "../../../../convex/_generated/api";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+let convexInstance: ConvexHttpClient | null = null;
+
+function getConvex() {
+  if (!convexInstance) {
+    const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+    if (!url) {
+      throw new Error("NEXT_PUBLIC_CONVEX_URL is not set");
+    }
+    convexInstance = new ConvexHttpClient(url);
+  }
+  return convexInstance;
+}
 
 export async function getDocuments(ids: Id<"documents">[]) {
-  return await convex.query(api.documents.getByIds, { ids });
+  return await getConvex().query(api.documents.getByIds, { ids });
 }
 
 export async function getUsers() {
