@@ -1,6 +1,6 @@
 # 📝 Hệ thống Soạn thảo Văn bản Cộng tác
 
-**Bản deploy mới:** https://docs-collab-ptit.vercel.app/
+**Bản deploy:** https://docs-collab-ptit.vercel.app/
 
 Dự án đồ án môn học: Xây dựng một ứng dụng web cho phép nhiều người dùng cùng soạn thảo văn bản theo thời gian thực, tương tự như Google Docs.
 
