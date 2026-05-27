@@ -70,7 +70,7 @@ export const ShareDialog = ({ documentId, initialLinkAccess = "none", children }
       await addCollaborator({ id: documentId, userId: user.id, role: "editor" });
       toast.success("Đã mời người dùng làm Editor");
       setEmail("");
-    } catch (error) {
+    } catch {
       toast.error("Lỗi khi mời người dùng");
     } finally {
       setIsUpdating(false);

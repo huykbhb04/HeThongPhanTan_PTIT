@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   let document;
   try {
     document = await convex.query(api.documents.getByIdForAuth, { id: room });
-  } catch (err) {
+  } catch {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -41,7 +41,9 @@ export async function POST(req: Request) {
     document.organizationId && document.organizationId === sessionClaims.org_id
   );
 
-  const collaborator = document.collaborators?.find((c: any) => c.userId === user.id);
+  const collaborator = document.collaborators?.find(
+    (c: { userId: string; role: string }) => c.userId === user.id
+  );
   
   let hasAccess = false;
   let isReadOnly = true;
