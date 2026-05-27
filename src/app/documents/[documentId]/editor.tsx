@@ -80,7 +80,7 @@ export const Editor = ({ initialContent, documentId }: EditorProps) => {
   const debouncedSave = useDebounce(performSave, 2000);
 
   const editor = useEditor({
-    editable: canWrite, 
+    editable: canWrite ?? undefined, 
     immediatelyRender: false,
     onCreate({ editor }) {
       setEditor(editor);
@@ -155,7 +155,7 @@ export const Editor = ({ initialContent, documentId }: EditorProps) => {
   useEffect(() => {
     if (editor && canWrite !== undefined) {
       isSetEditableFiring.current = true;
-      editor.setEditable(canWrite);
+      editor.setEditable(canWrite ?? false);
       // reset flag after microtask so onUpdate from setEditable is skipped
       setTimeout(() => { isSetEditableFiring.current = false; }, 0);
     }
