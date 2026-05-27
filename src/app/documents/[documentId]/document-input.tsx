@@ -11,6 +11,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { toast } from "sonner";
 import { LoaderIcon } from "lucide-react";
+import { useEditorStore } from "@/store/use-editor-store";
 
 interface DocumentInputProps {
   title: string;
@@ -56,8 +57,10 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
     debouncedUpdate(newValue);
   };
 
-  const showLoader = isPending || status === "connecting" || status === "reconnecting";
-  const showError = status === "disconnected";
+  const { saveStatus } = useEditorStore();
+
+  const showLoader = isPending || status === "connecting" || status === "reconnecting" || saveStatus === "saving";
+  const showError = status === "disconnected" || saveStatus === "error";
 
   return (
     <div className="flex items-center gap-2">

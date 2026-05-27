@@ -28,3 +28,26 @@ export async function getUsers() {
 
   return users;
 }
+
+export async function getUserByEmail(email: string) {
+  const clerk = await clerkClient();
+  const response = await clerk.users.getUserList({ emailAddress: [email] });
+  if (response.data.length === 0) return null;
+  const user = response.data[0];
+  return {
+    id: user.id,
+    name: user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous",
+    avatar: user.imageUrl,
+  };
+}
+
+export async function getUsersByIds(ids: string[]) {
+  if (!ids || ids.length === 0) return [];
+  const clerk = await clerkClient();
+  const response = await clerk.users.getUserList({ userId: ids });
+  return response.data.map((user) => ({
+    id: user.id,
+    name: user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous",
+    avatar: user.imageUrl,
+  }));
+}

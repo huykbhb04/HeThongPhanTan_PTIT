@@ -22,27 +22,51 @@ export async function POST(req: Request) {
   }
 
   const { room } = await req.json();
-  const document = await convex.query(api.documents.getById, { id: room });
+  
+  // Use getByIdForAuth which doesn't check auth in Convex, 
+  // so we can fetch the document config and perform auth locally here.
+  let document;
+  try {
+    document = await convex.query(api.documents.getByIdForAuth, { id: room });
+  } catch (err) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
   if (!document) {
-    return new Response("Unauthorized", { status: 401 });
+    return new Response("Not Found", { status: 404 });
   }
 
   const isOwner = document.ownerId === user.id;
   const isOrganizationMember = !!(
     document.organizationId && document.organizationId === sessionClaims.org_id
   );
-  // Cho phép: owner, thành viên cùng org, HOẶC bất kỳ ai đã đăng nhập có link tài liệu
-  // (tương tự "Anyone with the link" của Google Docs)
-  const isAuthenticated = !!user.id;
 
-  if (!isOwner && !isOrganizationMember && !isAuthenticated) {
+  const collaborator = document.collaborators?.find((c: any) => c.userId === user.id);
+  
+  let hasAccess = false;
+  let isReadOnly = true;
+
+  if (isOwner || isOrganizationMember) {
+    hasAccess = true;
+    isReadOnly = false; 
+  } else if (collaborator) {
+    hasAccess = true;
+    isReadOnly = collaborator.role === "viewer";
+  } else if (document.linkAccess === "editor") {
+    hasAccess = true;
+    isReadOnly = false;
+  } else if (document.linkAccess === "viewer") {
+    hasAccess = true;
+    isReadOnly = true;
+  }
+
+  if (!hasAccess) {
     return new Response("Unauthorized", { status: 401 });
   }
 
   const name = user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous";
   const nameToNumber = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const hue = Math.abs(nameToNumber) % 360
+  const hue = Math.abs(nameToNumber) % 360;
   const color = `hsl(${hue}, 80%, 60%)`;
   
   const session = liveblocks.prepareSession(user.id, {
@@ -52,7 +76,13 @@ export async function POST(req: Request) {
       color,
     },
   });
-  session.allow(room, session.FULL_ACCESS);
+
+  if (isReadOnly) {
+    session.allow(room, session.READ_ACCESS);
+  } else {
+    session.allow(room, session.FULL_ACCESS);
+  }
+
   const { body, status } = await session.authorize();
 
   return new Response(body, { status });

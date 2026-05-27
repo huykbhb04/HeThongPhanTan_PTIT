@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 
 import { RenameDialog } from "@/components/rename-dialog";
+import { ShareDialog } from "@/components/share-dialog";
+import { Button } from "@/components/ui/button";
 // import { RemoveDialog } from "@/components/remove-dialog";
 import {
   Menubar,
@@ -261,6 +263,11 @@ export const Navbar = ({ data }: NavbarProps) => {
         </div>
       </div>
       <div className="flex gap-3 items-center pl-6">
+        <ShareDialog documentId={data._id} initialLinkAccess={data.linkAccess as "viewer" | "editor" | "none"}>
+          <Button variant="outline" className="h-9 gap-2">
+            Share
+          </Button>
+        </ShareDialog>
         <Avatars />
         <Inbox />
         <OrganizationSwitcher

@@ -26,7 +26,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
 
 import { useLiveblocksExtension } from "@liveblocks/react-tiptap";
-import { useStorage } from "@liveblocks/react";
+import { useStorage, useSelf } from "@liveblocks/react";
 
 import { useEditorStore } from "@/store/use-editor-store";
 import { FontSizeExtensions } from "@/extensions/font-size";
@@ -35,21 +35,52 @@ import { Ruler } from "./ruler";
 import { Threads } from "./threads";
 import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "@/constants/margins";
 
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useCallback, useEffect, useRef } from "react";
+
 interface EditorProps {
   initialContent?: string | undefined;
+  documentId: Id<"documents">;
 }
 
-export const Editor = ({ initialContent }: EditorProps) => {
+export const Editor = ({ initialContent, documentId }: EditorProps) => {
   const leftMargin = useStorage((root) => root.leftMargin) ?? LEFT_MARGIN_DEFAULT;
   const rightMargin = useStorage((root) => root.rightMargin) ?? RIGHT_MARGIN_DEFAULT;
+  const canWrite = useSelf((me) => me.canWrite);
+  const isSetEditableFiring = useRef(false);
 
   const liveblocks = useLiveblocksExtension({
     initialContent,
     offlineSupport_experimental: true,
   });
-  const { setEditor } = useEditorStore();
+  const { setEditor, setSaveStatus } = useEditorStore();
+
+  const saveContent = useMutation(api.documents.saveContent);
+
+  const performSave = useCallback(
+    async (html: string) => {
+      if (!canWrite) return;
+      if (!documentId) return; // guard: documentId not yet available
+      
+      try {
+        setSaveStatus("saving");
+        await saveContent({ id: documentId, content: html });
+        setSaveStatus("saved");
+      } catch (err) {
+        console.error("Auto-save failed:", err);
+        setSaveStatus("error");
+      }
+    },
+    [saveContent, documentId, setSaveStatus, canWrite]
+  );
+
+  const debouncedSave = useDebounce(performSave, 2000);
 
   const editor = useEditor({
+    editable: canWrite, 
     immediatelyRender: false,
     onCreate({ editor }) {
       setEditor(editor);
@@ -59,6 +90,9 @@ export const Editor = ({ initialContent }: EditorProps) => {
     },
     onUpdate({ editor }) {
       setEditor(editor);
+      if (isSetEditableFiring.current) return; // skip ghost update from setEditable
+      setSaveStatus("saving");
+      debouncedSave(editor.getHTML());
     },
     onSelectionUpdate({ editor }) {
       setEditor(editor);
@@ -117,6 +151,15 @@ export const Editor = ({ initialContent }: EditorProps) => {
       TaskItem.configure({ nested: true }),
     ],
   });
+
+  useEffect(() => {
+    if (editor && canWrite !== undefined) {
+      isSetEditableFiring.current = true;
+      editor.setEditable(canWrite);
+      // reset flag after microtask so onUpdate from setEditable is skipped
+      setTimeout(() => { isSetEditableFiring.current = false; }, 0);
+    }
+  }, [editor, canWrite]);
 
   return (
     <div className="size-full overflow-x-auto bg-editor-bg px-4 print:p-0 print:bg-white print:overflow-visible">
